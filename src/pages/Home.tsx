@@ -20,7 +20,7 @@ export default function Home() {
 
   const [tokenIdToAssociate, setTokenIdToAssociate] = useState("");
   //const prizeAccount = process.env.REACT_APP_STAKE_ACCOUNT_ID;
-  const prizeAccount = "0.0.3482588";
+  const prizeAccount = "0.0.4353168";
   console.log("Hashprize ID:", prizeAccount);
 
   // Purpose: Get the account token balances with token info for the current account and set them to state
@@ -63,175 +63,64 @@ export default function Home() {
         variant="h4"
         color="white"
       >
-        Hashprize
+        Hashprize<br/>
       </Typography>
-      {walletInterface !== null && (
+      <Stack
+            direction='row'
+            gap={8}
+            alignItems='center'
+            justifyContent='space-evenly'
+      >
+        <Typography>
+            Total Amount Staked:
+            <br/>
+            Accounts:
+            <br/>
+            Previous Winner:
+            <br/>
+            Next Drawing: TBD
+        </Typography>
+      </Stack>
+      
+      {walletInterface !== null ? (
         <>
           <Stack
             direction='row'
             gap={2}
             alignItems='center'
           >
-            <Typography>
-              Transfer
-            </Typography>
-            <TextField
-              label='Available Tokens'
-              value={selectedTokenId}
-              select
-              onChange={(e) => setSelectedTokenId(e.target.value)}
-              sx={{
-                width: '250px',
-                height: '50px',
-              }}
-            >
-              <MenuItem
-                value={''}
-              >
-                Select a token
-              </MenuItem>
-              {tokensWithNonZeroBalance.map((token) => {
-                const tokenBalanceAdjustedForDecimals = token.balance / Math.pow(10, Number.parseInt(token.info.decimals));
-                return (
-                  <MenuItem
-                    key={token.token_id}
-                    value={token.token_id}
-                  >
-                    {token.info.name}({token.token_id}): ({tokenBalanceAdjustedForDecimals})
-                  </MenuItem>
-                );
-              }
-              )}
-            </TextField>
-            {selectedTokenBalanceWithInfo?.info?.type === "NON_FUNGIBLE_UNIQUE" && (
-              <TextField
-                label='Serial Number'
-                select
-                value={serialNumber.toString()}
-                onChange={(e) => setSerialNumber(Number.parseInt(e.target.value))}
-                sx={{
-                  width: '190px',
-                  height: '50px',
-                }}
-              >
-                <MenuItem
-                  value={UNSELECTED_SERIAL_NUMBER}
-                >
-                  Select a Serial Number
-                </MenuItem>
-                {selectedTokenBalanceWithInfo.nftSerialNumbers?.map((serialNumber) => {
-                  return (
-                    <MenuItem
-                      key={serialNumber}
-                      value={serialNumber}
-                    >
-                      {serialNumber}
-                    </MenuItem>
-                  );
-                }
-                )}
-              </TextField>
-            )}
-            {selectedTokenBalanceWithInfo?.info?.type === "FUNGIBLE_COMMON" && (
-              <TextField
-                type='number'
-                label='amount'
-                value={amount}
-                onChange={(e) => setAmount(parseInt(e.target.value))}
-                sx={{
-                  maxWidth: '100px'
-                }}
-              />
-            )}
-            {/* not included in the dropdown stage. this is in the association/send stage */}
-            <Typography>
-              HTS Token
-              to
-            </Typography>
-            <TextField
-              value={toAccountId}
-              onChange={(e) => setToAccountId(e.target.value)}
-              label='account id or evm address'
-            />
-            <Button
-              variant='contained'
-              onClick={async () => {
-                if (selectedTokenBalanceWithInfo === undefined) {
-                  console.log(`Token Id is empty.`)
-                  return;
-                }
-                
-                // check if receiver has associated
-                const mirrorNodeClient = new MirrorNodeClient(appConfig.networks.testnet);
-                const isAssociated = await mirrorNodeClient.isAssociated(AccountId.fromString(toAccountId), selectedTokenId);
-                if (!isAssociated) {
-                  console.log(`Receiver is not associated with token id: ${selectedTokenId}`);
-                  return;
-                }
-                if (selectedTokenBalanceWithInfo.info.type === "NON_FUNGIBLE_UNIQUE") {
-                  await walletInterface.transferNonFungibleToken(
-                    AccountId.fromString(toAccountId),
-                    TokenId.fromString(selectedTokenId),
-                    serialNumber);
-                } else {
-                  const amountWithDecimals = amount * Math.pow(10, Number.parseInt(selectedTokenBalanceWithInfo.info.decimals));
-                  await walletInterface.transferFungibleToken(
-                    AccountId.fromString(toAccountId),
-                    TokenId.fromString(selectedTokenId),
-                    amountWithDecimals);
-                }
-              }}
-            >
-              <SendIcon />
-            </Button>
-          </Stack>
-          <Stack
-            direction='row'
-            gap={2}
-            alignItems='center'
-          >
-            <TextField
-              value={tokenIdToAssociate}
-              label='token id'
-              onChange={(e) => setTokenIdToAssociate(e.target.value)}
-            />
-            <Button
-              variant='contained'
-              onClick={async () => {
-                if (tokenIdToAssociate === "") {
-                  console.log(`Token Id is empty.`)
-                  return;
-                }
-                await walletInterface.associateToken(TokenId.fromString(tokenIdToAssociate));
-              }}
-            >
-              Associate Token
-            </Button>
-          </Stack>
-          <Stack
-            direction='row'
-            gap={2}
-            alignItems='center'
-          >
-            {stakedAccount === prizeAccount && (
+            {stakedAccount === prizeAccount ? 
               <Typography>
-                Thanks for staking to Hashprize
+                Your account is staked to Hashprize. Thanks!
+                <br/>
+                Your share of the stake:
               </Typography>
-            )}
-            <Typography>
-              Your account is staked to: {stakedAccount}
-            </Typography>
-            <Button
-              variant='contained'
-              onClick={async () => {
-                await walletInterface.updateAccountStaking(AccountId.fromString(prizeAccount));
-              }}
-            >
-              Stake to Hashprize
-            </Button>
+             :
+            <>
+              <Typography>
+                To join press this button:
+              </Typography>
+              <Button
+                variant='contained'
+                onClick={async () => {
+                  await walletInterface.updateAccountStaking(AccountId.fromString(prizeAccount));
+                }}
+              >
+                Stake to Hashprize
+              </Button>
+            </>
+            }
           </Stack>
         </>
-      )}
+      ) : 
+        <>
+          <Typography
+            variant="h5"
+            color="white"
+          >
+          <br/><br/>Connect wallet to view more options &#x21D7;
+          </Typography>
+        </>}
     </Stack>
   )
 }
