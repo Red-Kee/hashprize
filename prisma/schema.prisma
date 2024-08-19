@@ -1,0 +1,27 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id    Int     @id @default(autoincrement())
+  address String  @unique
+  dateStakeActive String
+  balance  Int
+  drawingsWon Drawing[]
+}
+
+model Drawing {
+  id        Int     @id @default(autoincrement())
+  date      String
+  winner    Account @relation(fields: [address], references: [address])
+  address   String
+  prize     Int
+}
