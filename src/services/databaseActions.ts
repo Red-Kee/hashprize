@@ -1,15 +1,23 @@
-import { PrismaClient, Account } from '@prisma/client'
+import { PrismaClient, Account, Drawing } from '@prisma/client'
 
-const prisma = new PrismaClient()
+//const prisma = new PrismaClient();
+const simulatedAccounts: Account[] = [
+    {"id":1, "address":"9.9.1", "balance":2018, dateStakeActive:"true"},
+    {"id":2, "address":"9.9.2", "balance":404, dateStakeActive:"true"},
+    {"id":3, "address":"9.9.3", "balance":1000, dateStakeActive:"true"}
+];
+const simulatedDrawings: Drawing[] = [
+    {"id":1, "date":"Wed, 21 Aug 2024 03:59:00 GMT", "address":"9.9.2", "prize":777}
+];
 
 export async function addAccount(newAddress: string, newBalance?: number): Promise<Account> {
-  const account = await prisma.account.create({
-    data: {
-      address: newAddress,
-      dateStakeActive: "TBD",
-      balance: newBalance ? newBalance : 0,
-    },
-  })
+  const account: Account = {"id":(simulatedAccounts.length+1), "address":newAddress, "balance":newBalance?Math.floor(newBalance):0, "dateStakeActive":"true"};
+  const existingIndex = simulatedAccounts.findIndex((acc) => newAddress === acc.address);
+  if (existingIndex >= 0) {
+    simulatedAccounts[existingIndex] = account; 
+  } else {
+    simulatedAccounts.push(account);
+  }
   return account;
 }
 
@@ -17,46 +25,47 @@ export async function addDrawing(winAddress: string, prizeAmount: number, date ?
   if (!date) {
     date = new Date().toUTCString();
   }
-  const account = await prisma.drawing.create({
-    data: {
-      address: winAddress,
-      prize: prizeAmount,
-      date: date,
-    },
-  })
+  const drawing: Drawing = {"id":(simulatedDrawings.length+1), "date":date, "address":winAddress, "prize":777};
+  return drawing;
+}
+
+export async function setAccountBalance(accountAddress: string, newBalance: number): Promise<Account|undefined> {
+  const account = simulatedAccounts.find(i => i.address === accountAddress);
+  if (account) {
+    account.balance = Math.floor(newBalance);
+  }
   return account;
 }
 
-export async function setAccountBalance(accountAddress: string, newBalance: number): Promise<Account> {
-  const account = await prisma.account.update({
-    where: {
-      address: accountAddress,
-    },
-    data: {
-      balance: newBalance,
-    },
-  })
-  return account;
+export async function getTotalAccounts(): Promise<number> {
+    return simulatedAccounts.length;
+}
+
+export async function getTotalAccountBalances(): Promise<number> {
+    return simulatedAccounts.reduce((n, {balance}) => n + balance, 0);
+}
+
+export async function getLastDrawing(): Promise<Drawing> {
+    return simulatedDrawings[simulatedDrawings.length - 1];
 }
 
 export async function getWinner(winningNumber: number): Promise<Account|null> {
-  let i: number = 0;
-  let result: number = 0;
-  const totalAccounts = await prisma.account.count();
+  let sum: number = 0;
+  const totalAccounts = simulatedAccounts.length;
   console.log('totalAccounts:', totalAccounts);
-  do {
-    i++;
-    const aggregations = await prisma.account.aggregate({
-      _sum: {
-        balance: true,
-      },
-      take: i,
-    })
-    result = aggregations._sum.balance === null ? 0 : aggregations._sum.balance;
-    console.log('sum:', result);
-  } while (i < totalAccounts && result < winningNumber);
-
-  console.log("Winning position:", i)
-  const winAccount = await prisma.account.findFirst({skip:i-1,})
-  return winAccount;
+  let winIndex = -1;
+  for (let i=0; i < totalAccounts; i++) {
+    sum += simulatedAccounts[i].balance;
+    if(sum >= winningNumber) {
+        winIndex = i;
+        break;
+    }
+  }
+  if (winIndex >= 0) {
+    const winAccount = simulatedAccounts[winIndex];
+    console.log("Winning account:", winAccount.address);
+    return winAccount;
+  } else {
+    return null;
+  }
 }
