@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { AccountId, TokenId, Hbar, HbarUnit } from "@hashgraph/sdk";
 import { MirrorNodeAccountTokenBalanceWithInfo, MirrorNodeClient } from "../services/wallets/mirrorNodeClient";
 import { appConfig } from "../config";
-import { addAccount, getLastDrawing, getTotalAccountBalances, getTotalAccounts } from "../services/databaseActions";
+import { addAccount, getAllAccounts, getLastDrawing, getTotalAccountBalances, getTotalAccounts, getWinner } from "../services/databaseActions";
 
 const UNSELECTED_SERIAL_NUMBER = -1;
 
@@ -24,6 +24,7 @@ export default function Home() {
   const [stakePercent, setStakePercent] = useState("");
   const [previousWinner, setPreviousWinner] = useState("");
   const [drawRandomNumber, setRandomNumber] = useState<number>();
+  const [simText, setSimText] = useState("");
   //const prizeAccount = process.env.REACT_APP_STAKE_ACCOUNT_ID;
   const prizeAccount = "0.0.4353168";
 
@@ -76,7 +77,29 @@ export default function Home() {
       }
     };
     fetchDBState();
-  }, [stakedAccount]);
+  }, [stakedAccount,totalStaked,totalAccounts,previousWinner,connectedAccountBalance]);
+
+  useEffect(() => {
+    if(drawRandomNumber) {
+      let doSim = async () => {
+        let resultText = await printAccounts();
+        resultText = resultText.concat(`\nRandom Number: ${drawRandomNumber}\n`);                   
+        if(drawRandomNumber) {
+          const winner = await getWinner(drawRandomNumber);
+          resultText = resultText.concat(`Winner: ${winner?.address}`);
+        }
+        setSimText(resultText);
+      }
+      doSim();
+    }
+  }, [drawRandomNumber]);
+
+  const printAccounts = async function() {
+    const accounts = await getAllAccounts();
+    let accountString = "Account balances:\n"
+    accounts.forEach((acc) => accountString = accountString.concat(`${acc.address} - ${acc.balance}\n`));
+    return accountString;
+  }
 
   return (
     <Stack alignItems="center" spacing={4}>
@@ -157,19 +180,26 @@ export default function Home() {
                     await walletInterface.getHederaRandomNumber(totalStaked).then((randomNumber) => {
                       setRandomNumber(randomNumber);
                       console.log("Random Number", randomNumber);
-                    })
-                  } else {
-                    console.log("Error in simulation. Total Amount Staked is unknown.");
+                    });
+                    /*let resultText = await printAccounts();
+                    resultText = resultText.concat(`\nRandom Number: ${drawRandomNumber}\n`);                   
+                    if(drawRandomNumber) {
+                      const winner = await getWinner(drawRandomNumber);
+                      resultText = resultText.concat(`Winner: ${winner?.address}`);
+                    }
+                    setSimText(resultText);*/
+                  } else { 
+                    setSimText("Error in simulation:\nTotal Amount Staked is unknown.");
                   }
                 }}
               >
                 Simulate Drawing
             </Button>
             <TextField
-              id="filled-multiline-static"
+              id="sim_text"
               multiline
-              rows={4}
-              defaultValue=""
+              rows={10}
+              defaultValue={simText}
               variant="filled"
             />
           </Stack>
