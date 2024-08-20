@@ -23,6 +23,7 @@ export default function Home() {
   const [totalStaked, setTotalStaked] = useState<number>();
   const [stakePercent, setStakePercent] = useState("");
   const [previousWinner, setPreviousWinner] = useState("");
+  const [drawRandomNumber, setRandomNumber] = useState<number>();
   //const prizeAccount = process.env.REACT_APP_STAKE_ACCOUNT_ID;
   const prizeAccount = "0.0.4353168";
 
@@ -113,7 +114,7 @@ export default function Home() {
               <Typography>
                 Your account is staked to Hashprize. Thanks!
                 <br/>
-                Your share of the stake: {stakePercent}
+                Your share of the stake: {stakePercent}%
               </Typography>
              :
             <>
@@ -143,6 +144,34 @@ export default function Home() {
               </Button>
             </>
             }
+          </Stack>
+          <Stack
+            direction='column'
+            gap={2}
+            alignItems='center'
+          >
+            <Button
+              variant='contained'
+              onClick={async () => {
+                  if(totalStaked) {
+                    await walletInterface.getHederaRandomNumber(totalStaked).then((randomNumber) => {
+                      setRandomNumber(randomNumber);
+                      console.log("Random Number", randomNumber);
+                    })
+                  } else {
+                    console.log("Error in simulation. Total Amount Staked is unknown.");
+                  }
+                }}
+              >
+                Simulate Drawing
+            </Button>
+            <TextField
+              id="filled-multiline-static"
+              multiline
+              rows={4}
+              defaultValue=""
+              variant="filled"
+            />
           </Stack>
         </>
       ) : 

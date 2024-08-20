@@ -9,4 +9,5 @@ export interface WalletInterface {
   transferNonFungibleToken: (toAddress: AccountId, tokenId: TokenId, serialNumber: number) => Promise<TransactionId | string | null>;
   associateToken: (tokenId: TokenId) => Promise<TransactionId | string | null>;
   updateAccountStaking: (toAddress: AccountId) => Promise<TransactionId | string | null>;
+  getHederaRandomNumber: (range: number) => Promise<number>;
 }

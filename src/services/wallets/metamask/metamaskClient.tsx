@@ -172,6 +172,11 @@ class MetaMaskWallet implements WalletInterface {
     return null;
   }
 
+  async getHederaRandomNumber(range: number) {
+    console.log("Metamask not yet supported");
+    return -1;
+  }
+
   // Purpose: build contract execute transaction and send to hashconnect for signing and execution
   // Returns: Promise<TransactionId | null>
   async executeContractFunction(contractId: ContractId, functionName: string, functionParameters: ContractFunctionParameterBuilder, gasLimit: number) {
