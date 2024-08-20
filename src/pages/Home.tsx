@@ -3,9 +3,10 @@ import { Stack } from "@mui/system";
 import { useWalletInterface } from "../services/wallets/useWalletInterface";
 import SendIcon from '@mui/icons-material/Send';
 import { useEffect, useState } from "react";
-import { AccountId, TokenId } from "@hashgraph/sdk";
+import { AccountId, TokenId, Hbar, HbarUnit } from "@hashgraph/sdk";
 import { MirrorNodeAccountTokenBalanceWithInfo, MirrorNodeClient } from "../services/wallets/mirrorNodeClient";
 import { appConfig } from "../config";
+import { addAccount, getLastDrawing, getTotalAccountBalances, getTotalAccounts } from "../services/databaseActions";
 
 const UNSELECTED_SERIAL_NUMBER = -1;
 
@@ -15,13 +16,15 @@ export default function Home() {
   const [amount, setAmount] = useState<number>(0);
   const [availableTokens, setAvailableTokens] = useState<MirrorNodeAccountTokenBalanceWithInfo[]>([]);
   const [stakedAccount, setStakedAccount] = useState("");
+  const [connectedAccountBalance, setConnectedAccountBalance] = useState<number>();
   const [selectedTokenId, setSelectedTokenId] = useState<string>('');
   const [serialNumber, setSerialNumber] = useState<number>(UNSELECTED_SERIAL_NUMBER);
-
-  const [tokenIdToAssociate, setTokenIdToAssociate] = useState("");
+  const [totalAccounts, setTotalAccounts] = useState<number>();
+  const [totalStaked, setTotalStaked] = useState<number>();
+  const [stakePercent, setStakePercent] = useState("");
+  const [previousWinner, setPreviousWinner] = useState("");
   //const prizeAccount = process.env.REACT_APP_STAKE_ACCOUNT_ID;
   const prizeAccount = "0.0.4353168";
-  console.log("Hashprize ID:", prizeAccount);
 
   // Purpose: Get the account token balances with token info for the current account and set them to state
   useEffect(() => {
@@ -40,7 +43,9 @@ export default function Home() {
     mirrorNodeClient.getAccountInfo(AccountId.fromString(accountId)).then((accountInfoJson) => {
       console.log(accountInfoJson);
       console.log("staked ID:", accountInfoJson.staked_account_id);
+      console.log("balance:", Hbar.fromTinybars(accountInfoJson.balance.balance).to(HbarUnit.Hbar).toNumber());
       setStakedAccount(accountInfoJson.staked_account_id);
+      setConnectedAccountBalance(Hbar.fromTinybars(accountInfoJson.balance.balance).to(HbarUnit.Hbar).toNumber());
     }).catch((error) => {
       console.error(error);
     });
@@ -57,6 +62,21 @@ export default function Home() {
     setSerialNumber(UNSELECTED_SERIAL_NUMBER);
   }, [selectedTokenId]);
 
+  useEffect(() => {
+    if(stakedAccount === prizeAccount) {
+      addAccount(stakedAccount,connectedAccountBalance);
+    }
+    const fetchDBState = async () => {
+      setTotalStaked(await getTotalAccountBalances());
+      setTotalAccounts(await getTotalAccounts());
+      setPreviousWinner((await getLastDrawing()).address);
+      if((stakedAccount === prizeAccount) && connectedAccountBalance && totalStaked) {
+        setStakePercent((connectedAccountBalance*100/totalStaked).toFixed(5));
+      }
+    };
+    fetchDBState();
+  }, [stakedAccount]);
+
   return (
     <Stack alignItems="center" spacing={4}>
       <Typography
@@ -72,11 +92,11 @@ export default function Home() {
             justifyContent='space-evenly'
       >
         <Typography>
-            Total Amount Staked:
+            Total Amount Staked: {totalStaked}
             <br/>
-            Accounts:
+            Accounts: {totalAccounts}
             <br/>
-            Previous Winner:
+            Previous Winner: {previousWinner}
             <br/>
             Next Drawing: TBD
         </Typography>
@@ -93,7 +113,7 @@ export default function Home() {
               <Typography>
                 Your account is staked to Hashprize. Thanks!
                 <br/>
-                Your share of the stake:
+                Your share of the stake: {stakePercent}
               </Typography>
              :
             <>
@@ -103,7 +123,20 @@ export default function Home() {
               <Button
                 variant='contained'
                 onClick={async () => {
-                  await walletInterface.updateAccountStaking(AccountId.fromString(prizeAccount));
+                  await walletInterface.updateAccountStaking(AccountId.fromString(prizeAccount)).then(() => {
+                    setTimeout(() => {
+                      const mirrorNodeClient = new MirrorNodeClient(appConfig.networks.testnet);
+                      mirrorNodeClient.getAccountInfo(AccountId.fromString(accountId)).then((accountInfoJson) => {
+                        console.log("staked ID:", accountInfoJson.staked_account_id);
+                        setStakedAccount(accountInfoJson.staked_account_id);
+                        //addAccount(accountId,Hbar.fromTinybars(accountInfoJson.balance.balance).to(HbarUnit.Hbar).toNumber());
+                      }).catch((error) => {
+                        console.error(error);
+                      });
+                    }, 7000);
+                  }).catch((error) => {
+                    console.error(error);
+                  });
                 }}
               >
                 Stake to Hashprize
