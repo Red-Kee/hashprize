@@ -45,6 +45,10 @@ export async function getTotalAccountBalances(): Promise<number> {
     return simulatedAccounts.reduce((n, {balance}) => n + balance, 0);
 }
 
+export async function getAllAccounts(): Promise<Account[]> {
+    return simulatedAccounts;
+}
+
 export async function getLastDrawing(): Promise<Drawing> {
     return simulatedDrawings[simulatedDrawings.length - 1];
 }
@@ -52,7 +56,6 @@ export async function getLastDrawing(): Promise<Drawing> {
 export async function getWinner(winningNumber: number): Promise<Account|null> {
   let sum: number = 0;
   const totalAccounts = simulatedAccounts.length;
-  console.log('totalAccounts:', totalAccounts);
   let winIndex = -1;
   for (let i=0; i < totalAccounts; i++) {
     sum += simulatedAccounts[i].balance;
@@ -63,7 +66,7 @@ export async function getWinner(winningNumber: number): Promise<Account|null> {
   }
   if (winIndex >= 0) {
     const winAccount = simulatedAccounts[winIndex];
-    console.log("Winning account:", winAccount.address);
+    console.log(`Winning account is ${winAccount.address} for number ${winningNumber}`);
     return winAccount;
   } else {
     return null;
