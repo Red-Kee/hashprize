@@ -128,6 +128,13 @@ export class MirrorNodeClient {
     return accountInfoJson;
   }
 
+  async getLastTransaction(accountId: AccountId, transactionType?: string) {
+    const typeString = transactionType? `&transactionType=${transactionType}`  : "";
+    const transactionInfo = await fetch(`${this.url}/api/v1/transactions?account.id=${accountId}&limit=1${typeString}`, { method: "GET" });
+    const transactionInfoJson = await transactionInfo.json();
+    return transactionInfoJson;
+  }
+
   // Purpose: check if an account is associated with a token
   // Returns: true if the account is associated with the token, false otherwise
   async isAssociated(accountId: AccountId, tokenId: string) {

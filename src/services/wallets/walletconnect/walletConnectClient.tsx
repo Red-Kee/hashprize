@@ -1,12 +1,13 @@
 import { WalletConnectContext } from "../../../contexts/WalletConnectContext";
 import { useCallback, useContext, useEffect } from 'react';
 import { WalletInterface } from "../walletInterface";
-import { AccountId, ContractExecuteTransaction, ContractId, LedgerId, TokenAssociateTransaction, TokenId, Transaction, TransactionId, TransferTransaction, Client, AccountUpdateTransaction } from "@hashgraph/sdk";
+import { AccountId, ContractExecuteTransaction, ContractId, LedgerId, TokenAssociateTransaction, TokenId, Transaction, TransactionId, TransferTransaction, Client, AccountUpdateTransaction, PrngTransaction, TransactionRecordQuery } from "@hashgraph/sdk";
 import { ContractFunctionParameterBuilder } from "../contractFunctionParameterBuilder";
 import { appConfig } from "../../../config";
 import { SignClientTypes } from "@walletconnect/types";
-import { DAppConnector, HederaJsonRpcMethod, HederaSessionEvent, HederaChainId, SignAndExecuteTransactionParams, transactionToBase64String } from "@hashgraph/hedera-wallet-connect";
+import { DAppConnector, HederaJsonRpcMethod, HederaSessionEvent, HederaChainId, SignAndExecuteTransactionParams, transactionToBase64String, queryToBase64String, SignAndExecuteQueryParams } from "@hashgraph/hedera-wallet-connect";
 import EventEmitter from "events";
+import { MirrorNodeClient } from "../mirrorNodeClient";
 
 // Created refreshEvent because `dappConnector.walletConnectClient.on(eventName, syncWithWalletConnectContext)` would not call syncWithWalletConnectContext
 // Reference usage from walletconnect implementation https://github.com/hashgraph/hedera-wallet-connect/blob/main/src/lib/dapp/index.ts#L120C1-L124C9
@@ -52,6 +53,9 @@ export const openWalletConnectModal = async () => {
 };
 
 class WalletConnectWallet implements WalletInterface {
+  // set to true to use Math.random() instead of requesting one from Hedera network
+  readonly useMathRandom: boolean = true;
+
   private accountId() {
     // Need to convert from walletconnect's AccountId to hashgraph/sdk's AccountId because walletconnect's AccountId and hashgraph/sdk's AccountId are not the same!
     return AccountId.fromString(dappConnector.signers[0].getAccountId().toString());
@@ -135,6 +139,48 @@ class WalletConnectWallet implements WalletInterface {
     const frozenTx = this.freezeTx(accountUpdateTransaction);
     const txResult = await this.signAndExecuteTransaction(frozenTx);
     return txResult ? txResult.transactionId : null;
+  }
+
+  async getHederaRandomNumber(range: number) {
+    let randomNumber = -1;
+    if (this.useMathRandom) {
+      randomNumber = Math.floor(Math.random() * range);
+    } else {
+    // Attempt to request a random number from Hedera network
+    const transaction = new PrngTransaction()
+      .setRange(range);
+
+    const frozenTx = this.freezeTx(transaction);
+    const txResult = await this.signAndExecuteTransaction(frozenTx);
+    // Using mirror node to get the completed transaction ID since WalletConnect doesn't seem to give it
+    const mirrorNodeClient = new MirrorNodeClient(appConfig.networks.testnet);
+    const lastTxResponse = await mirrorNodeClient.getLastTransaction(this.accountId(),"UTILPRNG");
+
+    console.log(lastTxResponse);
+    console.log(lastTxResponse.transactions[0].transaction_id);
+    console.log("frozenTx ID:", frozenTx.transactionId);
+    const txId : string = lastTxResponse.transactions[0].transaction_id;
+    const transactionId = txId.replace("-","@").replace("-",".");
+    console.log("Formatted ID:", transactionId);
+    // Query the transaction record to get the random number
+    if (transactionId) {
+      const recordQuery = new TransactionRecordQuery()
+        .setTransactionId(transactionId.toString());
+      const params: SignAndExecuteQueryParams = {
+          signerAccountId: `::${this.accountId().toString()}`, // dApps seem to expect two colons in front of the signerAccountId, I'm not sure why. Hoping this gets cleaned up by wallets and walletconnect.
+          query: queryToBase64String(recordQuery)
+        };
+      try {
+        const result = await dappConnector.signAndExecuteQuery(params);
+        console.log("result: ", result.result);
+      } catch {
+        console.log("failed");
+        return -1;
+      }
+      // TODO: never assigned random number since the above did not work
+    }
+    }
+    return randomNumber;
   }
 
   // Purpose: build contract execute transaction and send to wallet for signing and execution

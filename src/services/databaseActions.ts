@@ -2,12 +2,12 @@ import { PrismaClient, Account, Drawing } from '@prisma/client'
 
 //const prisma = new PrismaClient();
 const simulatedAccounts: Account[] = [
-    {"id":1, "address":"9.9.1", "balance":2018, dateStakeActive:"true"},
-    {"id":2, "address":"9.9.2", "balance":404, dateStakeActive:"true"},
-    {"id":3, "address":"9.9.3", "balance":1000, dateStakeActive:"true"}
+    {"id":1, "address":"0.0.example1", "balance":2018, dateStakeActive:"true"},
+    {"id":2, "address":"0.0.example2", "balance":404, dateStakeActive:"true"},
+    {"id":3, "address":"0.0.example3", "balance":1000, dateStakeActive:"true"}
 ];
 const simulatedDrawings: Drawing[] = [
-    {"id":1, "date":"Wed, 21 Aug 2024 03:59:00 GMT", "address":"9.9.2", "prize":777}
+    {"id":1, "date":"Wed, 21 Aug 2024 03:59:00 GMT", "address":"0.0.example2", "prize":777}
 ];
 
 export async function addAccount(newAddress: string, newBalance?: number): Promise<Account> {
