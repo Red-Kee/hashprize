@@ -11,17 +11,24 @@ datasource db {
 }
 
 model Account {
-  id    Int     @id @default(autoincrement())
-  address String  @unique
-  dateStakeActive String
-  balance  Int
-  drawingsWon Drawing[]
+  id              Int      @id @default(autoincrement())
+  address         String   @unique
+  dateStakeActive DateTime @default(now())
+  balance         Decimal  @default(0)
+  isActive        Boolean  @default(true)
+  lastUpdated     DateTime @updatedAt
+  drawingsParticipated Int @default(0)
+  drawingsWon     Drawing[]
 }
 
 model Drawing {
-  id        Int     @id @default(autoincrement())
-  date      String
-  winner    Account @relation(fields: [address], references: [address])
-  address   String
-  prize     Int
+  id              Int      @id @default(autoincrement())
+  date            DateTime @default(now())
+  winnerAddress   String
+  winnerBalance   Decimal
+  totalPoolSize   Decimal
+  totalParticipants Int
+  randomNumber    Int
+  prize           Decimal
+  winner          Account? @relation(fields: [winnerAddress], references: [address])
 }

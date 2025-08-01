@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { AccountId, TokenId, Hbar, HbarUnit } from "@hashgraph/sdk";
 import { MirrorNodeAccountTokenBalanceWithInfo, MirrorNodeClient } from "../services/wallets/mirrorNodeClient";
 import { appConfig } from "../config";
-import { addAccount, getAllAccounts, getLastDrawing, getTotalAccountBalances, getTotalAccounts, getWinner } from "../services/databaseActions";
+import { addAccount, getAllAccounts, getLastDrawing, getTotalAccountBalances, getTotalAccounts, getWinner } from "../services/mockDatabaseActions";
 
 const UNSELECTED_SERIAL_NUMBER = -1;
 
@@ -69,11 +69,18 @@ export default function Home() {
       addAccount(stakedAccount,connectedAccountBalance);
     }
     const fetchDBState = async () => {
-      setTotalStaked(await getTotalAccountBalances());
-      setTotalAccounts(await getTotalAccounts());
-      setPreviousWinner((await getLastDrawing()).address);
-      if((stakedAccount === prizeAccount) && connectedAccountBalance && totalStaked) {
-        setStakePercent((connectedAccountBalance*100/totalStaked).toFixed(5));
+      try {
+        setTotalStaked(await getTotalAccountBalances());
+        setTotalAccounts(await getTotalAccounts());
+        const lastDrawing = await getLastDrawing();
+        const winnerAddress = (lastDrawing as any).winnerAddress || 'Unknown';
+        setPreviousWinner(winnerAddress);
+        if((stakedAccount === prizeAccount) && connectedAccountBalance && totalStaked) {
+          setStakePercent((connectedAccountBalance*100/totalStaked).toFixed(4));
+        }
+      } catch (error) {
+        console.error('Error fetching database state:', error);
+        setPreviousWinner('No previous winner');
       }
     };
     fetchDBState();
@@ -97,7 +104,7 @@ export default function Home() {
   const printAccounts = async function() {
     const accounts = await getAllAccounts();
     let accountString = "Account balances:\n"
-    accounts.forEach((acc) => accountString = accountString.concat(`${acc.address} - ${acc.balance}\n`));
+    accounts.forEach((acc) => accountString = accountString.concat(`${acc.address} - ${Number(acc.balance)}\n`));
     return accountString;
   }
 
