@@ -105,17 +105,18 @@ export default function Home() {
     <Stack alignItems="center" spacing={4}>
       <Typography
         variant="h4"
-        color="white"
+        color="#000080" // Navy blue
       >
         Hashprize<br/>
       </Typography>
+      Pool staking rewards with others for a chance to win!
       <Stack
             direction='row'
             gap={8}
             alignItems='center'
             justifyContent='space-evenly'
       >
-        <Typography>
+        <Typography color="#000080">
             Total Amount Staked: {totalStaked}
             <br/>
             Accounts: {totalAccounts}
@@ -134,14 +135,16 @@ export default function Home() {
             alignItems='center'
           >
             {stakedAccount === prizeAccount ? 
-              <Typography>
+              <Typography color="#000080">
                 Your account is staked to Hashprize. Thanks!
                 <br/>
-                Your share of the stake: {stakePercent}%
+                Your amount is {connectedAccountBalance?.toFixed(4)}ℏ
+                <br/>
+                Your share of the pool: {stakePercent}%
               </Typography>
              :
             <>
-              <Typography>
+              <Typography color="#000080">
                 To join press this button:
               </Typography>
               <Button
@@ -201,6 +204,9 @@ export default function Home() {
               rows={10}
               defaultValue={simText}
               variant="filled"
+              InputProps={{
+                style: { color: '#000080' } // Navy blue text color
+              }}
             />
           </Stack>
         </>
@@ -208,7 +214,7 @@ export default function Home() {
         <>
           <Typography
             variant="h5"
-            color="white"
+            color="#000080" // Navy blue
           >
           <br/><br/>Connect wallet to view more options &#x21D7;
           </Typography>

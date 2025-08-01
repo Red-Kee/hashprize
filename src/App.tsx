@@ -4,7 +4,7 @@ import NavBar from './components/Navbar';
 import { Box, ThemeProvider } from '@mui/material';
 import { AllWalletsProvider } from './services/wallets/AllWalletsProvider';
 import AppRouter from './AppRouter';
-import colorBackground from './assets/colors.png';
+import poolPartyBackground from './assets/pool-party-background.png';
 import { theme } from './theme';
 import "./App.css";
 
@@ -18,8 +18,8 @@ function App() {
             display: 'flex',
             flexDirection: 'column',
             minHeight: '100vh',
-            backgroundColor: '#222222',
-            backgroundImage: `url(${colorBackground})`,
+            backgroundColor: '#87CEEB', // Light blue for a pool-like feel
+            backgroundImage: `url(${poolPartyBackground})`,
             backgroundSize: 'cover',
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'center'
