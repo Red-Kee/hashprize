@@ -1,8 +1,6 @@
+'use client';
+
 import { Button, Dialog, Stack } from "@mui/material";
-import { connectToMetamask } from "../services/wallets/metamask/metamaskClient";
-import { openWalletConnectModal } from "../services/wallets/walletconnect/walletConnectClient";
-import MetamaskLogo from "../assets/metamask-logo.svg";
-import WalletConnectLogo from "../assets/walletconnect-logo.svg";
 
 
 interface WalletSelectionDialogProps {
@@ -14,18 +12,22 @@ interface WalletSelectionDialogProps {
 export const WalletSelectionDialog = (props: WalletSelectionDialogProps) => {
   const { onClose, open, setOpen } = props;
 
+  const handleWalletConnectClick = async () => {
+    // Dynamic import to avoid SSR issues
+    const { openWalletConnectModal } = await import("../services/wallets/walletconnect/walletConnectClient");
+    openWalletConnectModal();
+    setOpen(false);
+  };
+
   return (
     <Dialog onClose={onClose} open={open}>
       <Stack p={2} gap={1}>
         <Button
           variant="contained"
-          onClick={() => {
-            openWalletConnectModal()
-            setOpen(false);
-          }}
+          onClick={handleWalletConnectClick}
         >
           <img
-            src={WalletConnectLogo}
+            src="/images/walletconnect-logo.svg"
             alt='walletconnect logo'
             className='walletLogoImage'
             style={{
@@ -33,22 +35,6 @@ export const WalletSelectionDialog = (props: WalletSelectionDialogProps) => {
             }}
           />
           WalletConnect
-        </Button>
-        <Button
-          variant="contained"
-          onClick={() => {
-            connectToMetamask();
-          }}
-        >
-          <img
-            src={MetamaskLogo}
-            alt='metamask logo'
-            className='walletLogoImage'
-            style={{
-              padding: '4px 4px 4px 0px'
-            }}
-          />
-          Metamask
         </Button>
       </Stack>
     </Dialog>

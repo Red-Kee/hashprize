@@ -8,16 +8,33 @@
 # testing
 /coverage
 
+# Next.js
+/.next/
+/out/
+
 # production
 /build
 
 # misc
 .DS_Store
+*.tsbuildinfo
+next-env.d.ts
+
+# local env files
+.env*.local
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# npm logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -25,3 +42,14 @@ yarn-error.log*
 # prisma
 /prisma/migrations
 /prisma/dev.db*
+
+# Logs
+logs
+*.log
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+Thumbs.db

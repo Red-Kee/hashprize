@@ -1,5 +1,6 @@
+'use client';
+
 import { Box } from '@mui/material';
-import BuiltOnHedera from "../assets/built-on-hedera.svg";
 
 export default function Footer() {
   return (
@@ -13,7 +14,7 @@ export default function Footer() {
         className='footer'
       >
           <img 
-            src={BuiltOnHedera}
+            src="/images/built-on-hedera.svg"
             alt='An upper case H with a line through the top and the text Build on Hedera'
             className='builtOnHederaSVG'
           />

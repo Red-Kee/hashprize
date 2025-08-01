@@ -1,12 +1,16 @@
-import { AppBar, Button, Toolbar, Typography } from '@mui/material';
+'use client'
+
+import { AppBar, Button, Toolbar, Typography, Box } from '@mui/material';
 import { useEffect, useState } from 'react';
-import HBARLogo from "../assets/hbar-logo.svg";
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useWalletInterface } from '../services/wallets/useWalletInterface';
 import { WalletSelectionDialog } from './WalletSelectionDialog';
 
 export default function NavBar() {
   const [open, setOpen] = useState(false);
   const { accountId, walletInterface } = useWalletInterface();
+  const pathname = usePathname();
 
   const handleConnect = async () => {
     if (accountId) {
@@ -25,10 +29,36 @@ export default function NavBar() {
   return (
     <AppBar position='relative'>
       <Toolbar>
-        <img src={HBARLogo} alt='An upper case H with a line through the top' className='hbarLogoImg' />
+        <img src="/images/hbar-logo.svg" alt='An upper case H with a line through the top' className='hbarLogoImg' />
         <Typography variant="h6" color="white" pl={1} noWrap>
           Hedera Hackathon
         </Typography>
+        
+        <Box sx={{ ml: 4, display: 'flex', gap: 2 }}>
+          <Button
+            color="inherit"
+            component={Link}
+            href="/"
+            sx={{ 
+              textDecoration: 'none',
+              backgroundColor: pathname === '/' ? 'rgba(255,255,255,0.1)' : 'transparent'
+            }}
+          >
+            Home
+          </Button>
+          <Button
+            color="inherit"
+            component={Link}
+            href="/docs"
+            sx={{ 
+              textDecoration: 'none',
+              backgroundColor: pathname === '/docs' ? 'rgba(255,255,255,0.1)' : 'transparent'
+            }}
+          >
+            Documentation
+          </Button>
+        </Box>
+
         <Button
           variant='contained'
           sx={{
