@@ -32,7 +32,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "react-scripts test"
+    "test": "react-scripts test",
+    "drawing": "tsx scripts/prize-drawing.ts",
+    "drawing:test": "tsx scripts/prize-drawing.ts test",
+    "drawing:conduct": "tsx scripts/prize-drawing.ts draw"
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
