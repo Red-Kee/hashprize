@@ -1,16 +1,19 @@
-import { PrismaClient, Account, Drawing } from '@prisma/client'
-
-const prisma = new PrismaClient();
+import { Account, Drawing } from '@prisma/client'
+import { Decimal } from '@prisma/client/runtime/library'
+import { prisma } from '../lib/db'
 
 export async function addAccount(newAddress: string, newBalance?: number): Promise<Account> {
+  const balanceValue = newBalance ? new Decimal(newBalance.toFixed(8)) : new Decimal(0);
+  
   return await prisma.account.upsert({
     where: { address: newAddress },
     update: { 
-      balance: newBalance ? parseFloat(newBalance.toFixed(4)) : 0
+      balance: balanceValue,
+      lastUpdated: new Date()
     },
     create: {
       address: newAddress,
-      balance: newBalance ? parseFloat(newBalance.toFixed(4)) : 0,
+      balance: balanceValue,
       dateStakeActive: new Date()
     }
   });
@@ -30,11 +33,11 @@ export async function addDrawing(
     data: {
       date: date || new Date(),
       winnerAddress: winnerAddress,
-      winnerBalance: parseFloat(winnerBalance.toFixed(4)),
-      totalPoolSize: parseFloat(totalPoolSize.toFixed(4)),
+      winnerBalance: new Decimal(winnerBalance.toFixed(8)),
+      totalPoolSize: new Decimal(totalPoolSize.toFixed(8)),
       totalParticipants: totalParticipants,
       randomNumber: randomNumber,
-      prize: parseFloat(prizeAmount.toFixed(4))
+      prize: new Decimal(prizeAmount.toFixed(8))
     }
   });
 

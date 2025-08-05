@@ -1,0 +1,35 @@
+// Prisma schema for Azure SQL Server (Production)
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id              Int      @id @default(autoincrement())
+  address         String   @unique
+  dateStakeActive DateTime @default(now())
+  balance         Decimal  @default(0) @db.Decimal(18,8)
+  isActive        Boolean  @default(true)
+  lastUpdated     DateTime @updatedAt
+  drawingsParticipated Int @default(0)
+  drawingsWon     Drawing[]
+}
+
+model Drawing {
+  id              Int      @id @default(autoincrement())
+  date            DateTime @default(now())
+  winnerAddress   String
+  winnerBalance   Decimal  @db.Decimal(18,8)
+  totalPoolSize   Decimal  @db.Decimal(18,8)
+  totalParticipants Int
+  randomNumber    Int
+  prize           Decimal  @db.Decimal(18,8)
+  prngTransactionId String?
+  winner          Account? @relation(fields: [winnerAddress], references: [address])
+}

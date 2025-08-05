@@ -33,6 +33,15 @@
     "start": "next start",
     "lint": "next lint",
     "test": "react-scripts test",
+    
+    "db:generate": "prisma generate",
+    "db:generate:prod": "prisma generate --schema=./prisma/schema.sqlserver.prisma",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:migrate:prod": "prisma migrate deploy --schema=./prisma/schema.sqlserver.prisma",
+    "db:seed": "prisma db seed",
+    "db:studio": "prisma studio",
+    "db:studio:prod": "prisma studio --schema=./prisma/schema.sqlserver.prisma",
+    
     "drawing": "tsx scripts/prize-drawing.ts",
     "drawing:test": "tsx scripts/prize-drawing.ts test",
     "drawing:conduct": "tsx scripts/prize-drawing.ts draw"

@@ -15,6 +15,10 @@
 # production
 /build
 
+# environment files
+.env
+.env.production
+
 # misc
 .DS_Store
 *.tsbuildinfo

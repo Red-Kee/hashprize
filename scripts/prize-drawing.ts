@@ -1,9 +1,8 @@
-import { PrismaClient } from '@prisma/client';
 import { AccountId, Hbar, HbarUnit, Client, PrivateKey, PrngTransaction } from '@hashgraph/sdk';
 import { MirrorNodeClient } from '../src/services/wallets/mirrorNodeClient';
 import { appConfig } from '../src/config';
-
-const prisma = new PrismaClient();
+import { prisma } from '../src/lib/db';
+import { Decimal } from '@prisma/client/runtime/library';
 const mirrorNodeClient = new MirrorNodeClient(appConfig.networks.testnet);
 
 // Prize account configuration from environment
@@ -80,6 +79,7 @@ interface AccountWithBalance {
 
 async function conductPrizeDrawing() {
   console.log('🎲 Starting prize drawing process...\n');
+  console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
 
   try {
     // Step 1: Query all accounts from database
@@ -204,11 +204,11 @@ async function conductPrizeDrawing() {
       data: {
         date: new Date(),
         winnerAddress: winner.address,
-        winnerBalance: winner.balance,
-        totalPoolSize: totalStaked,
+        winnerBalance: new Decimal(winner.balance.toFixed(8)),
+        totalPoolSize: new Decimal(totalStaked.toFixed(8)),
         totalParticipants: accountsWithBalance.length,
         randomNumber: randomNumber,
-        prize: prizeAmount,
+        prize: new Decimal(prizeAmount.toFixed(8)),
         prngTransactionId: prngResult.transactionId
       }
     });
