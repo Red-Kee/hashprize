@@ -30,6 +30,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:azure": "prisma generate --schema=./prisma/schema.sqlserver.prisma && next build",
     "start": "next start",
     "lint": "next lint",
     "test": "react-scripts test",

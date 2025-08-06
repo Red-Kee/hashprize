@@ -39,7 +39,7 @@ export default function Home() {
       // set to state
       setAvailableTokens(tokens);
       console.log(tokens);
-    }).catch((error) => {
+    }).catch((error: unknown) => {
       console.error(error);
     });
     mirrorNodeClient.getAccountInfo(AccountId.fromString(accountId)).then((accountInfoJson) => {
@@ -48,7 +48,7 @@ export default function Home() {
       console.log("balance:", Hbar.fromTinybars(accountInfoJson.balance.balance).to(HbarUnit.Hbar).toNumber());
       setStakedAccount(accountInfoJson.staked_account_id);
       setConnectedAccountBalance(Hbar.fromTinybars(accountInfoJson.balance.balance).to(HbarUnit.Hbar).toNumber());
-    }).catch((error) => {
+    }).catch((error: unknown) => {
       console.error(error);
     });
   }, [accountId])
@@ -159,16 +159,20 @@ export default function Home() {
                 onClick={async () => {
                   await walletInterface.updateAccountStaking(AccountId.fromString(prizeAccount)).then(() => {
                     setTimeout(() => {
+                      if (accountId === null) {
+                        console.error('Account ID is null, cannot get account info');
+                        return;
+                      }
                       const mirrorNodeClient = new MirrorNodeClient(appConfig.networks.testnet);
-                      mirrorNodeClient.getAccountInfo(AccountId.fromString(accountId)).then((accountInfoJson) => {
+                      mirrorNodeClient.getAccountInfo(AccountId.fromString(accountId!)).then((accountInfoJson) => {
                         console.log("staked ID:", accountInfoJson.staked_account_id);
                         setStakedAccount(accountInfoJson.staked_account_id);
                         //addAccount(accountId,Hbar.fromTinybars(accountInfoJson.balance.balance).to(HbarUnit.Hbar).toNumber());
-                      }).catch((error) => {
+                      }).catch((error: unknown) => {
                         console.error(error);
                       });
                     }, 7000);
-                  }).catch((error) => {
+                  }).catch((error: unknown) => {
                     console.error(error);
                   });
                 }}
@@ -187,7 +191,7 @@ export default function Home() {
               variant='contained'
               onClick={async () => {
                   if(totalStaked) {
-                    await walletInterface.getHederaRandomNumber(totalStaked).then((randomNumber) => {
+                    await walletInterface.getHederaRandomNumber(totalStaked).then((randomNumber: any) => {
                       setRandomNumber(randomNumber);
                       console.log("Random Number", randomNumber);
                     });
