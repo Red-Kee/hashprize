@@ -5,14 +5,18 @@
   "dependencies": {
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
-    "@hashgraph/hedera-wallet-connect": "^1.0.6",
-    "@hashgraph/sdk": "^2.44.0",
+    "@hashgraph/hedera-wallet-connect": "^1.5.1",
+    "@hashgraph/sdk": "^2.69.0",
     "@mui/icons-material": "^5.11.16",
     "@mui/material": "^5.13.0",
     "@prisma/client": "^5.18.0",
     "@types/node": "^16.18.31",
     "@types/react": "^18.2.6",
     "@types/react-dom": "^18.2.4",
+    "@walletconnect/modal": "^2.7.0",
+    "@walletconnect/sign-client": "^2.21.6",
+    "@walletconnect/types": "^2.21.6",
+    "@walletconnect/utils": "^2.21.6",
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.1",
     "dotenv": "^16.1.3",
@@ -34,7 +38,6 @@
     "start": "next start",
     "lint": "next lint",
     "test": "react-scripts test",
-    
     "db:generate": "prisma generate",
     "db:generate:prod": "prisma generate --schema=./prisma/schema.sqlserver.prisma",
     "db:migrate:dev": "prisma migrate dev",
@@ -42,7 +45,6 @@
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
     "db:studio:prod": "prisma studio --schema=./prisma/schema.sqlserver.prisma",
-    
     "drawing": "tsx scripts/prize-drawing.ts",
     "drawing:test": "tsx scripts/prize-drawing.ts test",
     "drawing:conduct": "tsx scripts/prize-drawing.ts draw"
