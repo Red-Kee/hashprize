@@ -45,12 +45,30 @@ const DocsPage: React.FC = () => {
         </AccordionSummary>
         <AccordionDetails>
           <Typography paragraph>
-            HashPrize is a decentralized prize drawing platform built on the Hedera network. 
-            Users can stake HBAR tokens to participate in drawings and have a chance to win prizes 
-            based on their participation level.
+            HashPrize is a no-loss yield lottery platform built on the Hedera network. 
+            Users can stake HBAR to participate in drawings that reward HBAR to the winner.
+            HashPrize uses indirect staking, a native feature of Hedera, so that no HBAR ever has to leave your account to participate.
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <InfoIcon sx={{ mr: 1, color: 'primary.main' }} />
+            <Typography variant="h6">Why is it called a no-loss yield lottery?</Typography>
+          </Box>
+          <Typography paragraph>
+            There is no entry fee or tickets to buy so users do not lose any funds from their account.
+            Prizes are funded by pooling the staking rewards/yield of all users.
+            Prize-linked savings accounts are a similar concept in which interest from all accounts fund prize drawings.
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <InfoIcon sx={{ mr: 1, color: 'primary.main' }} />
+            <Typography variant="h6">What is indirect staking?</Typography>
+          </Box>
+          <Typography paragraph>
+            Indirect staking is a unique feature of the Hedera network that allows users to stake to another account instead of a node. 
+            The account they stake to then receives their staking rewards, while users keep their HBAR in their own wallets.
+            Other crypto no-loss yield lotteries require users to transfer and lock-up their tokens in a smart contract to participate but Hashprize does not require that thanks to indirect staking.
           </Typography>
           <Box sx={{ mt: 2 }}>
-            <Chip label="Decentralized" color="primary" sx={{ mr: 1, mb: 1 }} />
+            <Chip label="Prizes" color="primary" sx={{ mr: 1, mb: 1 }} />
             <Chip label="Hedera Network" color="secondary" sx={{ mr: 1, mb: 1 }} />
             <Chip label="Fair Drawings" color="success" sx={{ mr: 1, mb: 1 }} />
             <Chip label="HBAR Staking" color="info" sx={{ mr: 1, mb: 1 }} />
@@ -110,7 +128,7 @@ const DocsPage: React.FC = () => {
               </ListItemIcon>
               <ListItemText 
                 primary="Stake HBAR" 
-                secondary="Choose your staking amount to participate in drawings"
+                secondary="Click button and sign transaction to stake to the HashPrize pool account. This uses Hedera's native indirect staking feature. Your staking rewards help fund the prizes."
               />
             </ListItem>
             <ListItem>
@@ -130,29 +148,8 @@ const DocsPage: React.FC = () => {
                 </Box>
               </ListItemIcon>
               <ListItemText 
-                primary="Participate in Drawings" 
-                secondary="Your stake automatically enters you into prize drawings"
-              />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon>
-                <Box sx={{ 
-                  width: 24, 
-                  height: 24, 
-                  borderRadius: '50%', 
-                  bgcolor: 'primary.main', 
-                  color: 'white', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  fontSize: '14px'
-                }}>
-                  4
-                </Box>
-              </ListItemIcon>
-              <ListItemText 
                 primary="Win Prizes!" 
-                secondary="Check back regularly to see if you've won any drawings"
+                secondary="You are done! As long as you remain staked to Hashprize, you are automatically entered into the regular prize drawings. No claims are needed. HBAR will be transferred automatically to winners."
               />
             </ListItem>
           </List>
@@ -175,13 +172,13 @@ const DocsPage: React.FC = () => {
             <ListItem>
               <ListItemText 
                 primary="Weighted Participation" 
-                secondary="Your chances are proportional to your stake amount"
+                secondary="Your chances are proportional to the amout you stake to HashPrize: (Your HBAR)/(Total HBAR Staked to HashPrize)"
               />
             </ListItem>
             <ListItem>
               <ListItemText 
                 primary="Random Selection" 
-                secondary="Winners are selected using cryptographically secure random numbers"
+                secondary="Winners are selected using cryptographically secure random numbers generated by Hedera"
               />
             </ListItem>
             <ListItem>
@@ -193,7 +190,13 @@ const DocsPage: React.FC = () => {
             <ListItem>
               <ListItemText 
                 primary="Transparent Results" 
-                secondary="All drawing results are publicly verifiable on the blockchain"
+                secondary="All drawing results are publicly verifiable on the Hedera DLT and shown on the past winners page (under construction)"
+              />
+            </ListItem>
+            <ListItem>
+              <ListItemText 
+                primary="Automatic Rewards" 
+                secondary="Winners automatically receive their HBAR prize - no claims or other actions required"
               />
             </ListItem>
           </List>
@@ -221,12 +224,6 @@ const DocsPage: React.FC = () => {
             </ListItem>
             <ListItem>
               <ListItemText 
-                primary="Smart Contracts" 
-                secondary="All operations are handled by audited smart contracts"
-              />
-            </ListItem>
-            <ListItem>
-              <ListItemText 
                 primary="Hedera Network" 
                 secondary="Built on Hedera's secure and energy-efficient network"
               />
@@ -235,47 +232,6 @@ const DocsPage: React.FC = () => {
               <ListItemText 
                 primary="Open Source" 
                 secondary="Our code is open source and available for review"
-              />
-            </ListItem>
-          </List>
-        </AccordionDetails>
-      </Accordion>
-
-      {/* Technical Information */}
-      <Accordion sx={{ mb: 2 }}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <CodeIcon sx={{ mr: 1, color: 'primary.main' }} />
-            <Typography variant="h6">Technical Information</Typography>
-          </Box>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
-            Platform Details:
-          </Typography>
-          <List dense>
-            <ListItem>
-              <ListItemText 
-                primary="Blockchain: Hedera Hashgraph" 
-                secondary="Fast, secure, and energy-efficient distributed ledger"
-              />
-            </ListItem>
-            <ListItem>
-              <ListItemText 
-                primary="Token: HBAR" 
-                secondary="Native cryptocurrency of the Hedera network"
-              />
-            </ListItem>
-            <ListItem>
-              <ListItemText 
-                primary="Consensus: Hashgraph" 
-                secondary="Asynchronous Byzantine Fault Tolerant consensus"
-              />
-            </ListItem>
-            <ListItem>
-              <ListItemText 
-                primary="Frontend: React + Next.js" 
-                secondary="Modern web application with server-side rendering"
               />
             </ListItem>
           </List>
@@ -291,9 +247,6 @@ const DocsPage: React.FC = () => {
           If you have questions or need support, we're here to help:
         </Typography>
         <Box sx={{ mt: 2 }}>
-          <Typography variant="body2">
-            • Check our FAQ section for common questions
-          </Typography>
           <Typography variant="body2">
             • Join our community Discord for real-time support
           </Typography>
