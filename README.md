@@ -8,9 +8,13 @@ Clone the repo to your desired location
 git clone https://github.com/Red-Kee/hashprize.git
 ```
 Create .env file, example for local dev environment:
+
 NODE_ENV=development
+
 DATABASE_URL="file:./dev.db"
+
 PRIZE_ACCOUNT_ID="" // A Hedera Account ID
+
 PRIZE_ACCOUNT_KEY="" // Used for running prize-drawing script
 
 1. Execute ```npm i```
