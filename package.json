@@ -47,10 +47,13 @@
     "db:studio:prod": "prisma studio --schema=./prisma/schema.sqlserver.prisma",
     "drawing": "tsx scripts/prize-drawing.ts",
     "drawing:test": "tsx scripts/prize-drawing.ts test",
-    "drawing:conduct": "tsx scripts/prize-drawing.ts draw"
+    "drawing:conduct": "tsx scripts/prize-drawing.ts draw",
+    "drawing:prod": "cross-env NODE_ENV=production tsx scripts/prize-drawing.ts draw",
+    "drawing:prod:test": "cross-env NODE_ENV=production tsx scripts/prize-drawing.ts test"
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "cross-env": "^10.0.0",
     "tsx": "^4.20.3"
   },
   "prisma": {

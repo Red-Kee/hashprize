@@ -1,9 +1,65 @@
 import { AccountId, Hbar, HbarUnit, Client, PrivateKey, PrngTransaction } from '@hashgraph/sdk';
 import { MirrorNodeClient } from '../src/services/wallets/mirrorNodeClient';
 import { appConfig } from '../src/config';
-import { prisma } from '../src/lib/db';
 import { Decimal } from '@prisma/client/runtime/library';
+import dotenv from 'dotenv';
+
+// Load environment-specific configuration
+if (process.env.NODE_ENV === 'production') {
+  dotenv.config({ path: '.env.production' });
+} else {
+  dotenv.config();
+}
+
+// Initialize Prisma client based on environment
+let prisma: any;
+if (process.env.NODE_ENV === 'production') {
+  console.log('🔗 Using Azure SQL Database for production');
+  try {
+    // For production, we need to use the SQL Server schema
+    const { PrismaClient } = require('@prisma/client');
+    prisma = new PrismaClient({
+      datasources: {
+        db: {
+          url: process.env.DATABASE_URL
+        }
+      },
+      log: ['error', 'warn']
+    });
+    
+    // Test the connection
+    console.log('🔍 Testing database connection...');
+  } catch (error) {
+    console.error('❌ Failed to initialize production database connection:', error);
+    console.log('🔄 Falling back to development database...');
+    const { prisma: localPrisma } = require('../src/lib/db');
+    prisma = localPrisma;
+  }
+} else {
+  console.log('🔗 Using local SQLite database for development');
+  const { prisma: localPrisma } = require('../src/lib/db');
+  prisma = localPrisma;
+}
 const mirrorNodeClient = new MirrorNodeClient(appConfig.networks.testnet);
+
+// Test database connection
+async function testDatabaseConnection(): Promise<boolean> {
+  try {
+    if (process.env.NODE_ENV === 'production') {
+      // Test Azure SQL connection with a simple query
+      await prisma.$queryRaw`SELECT 1 as test`;
+      console.log('✅ Azure SQL Database connection successful');
+    } else {
+      // Test SQLite connection
+      await prisma.account.findFirst();
+      console.log('✅ SQLite database connection successful');
+    }
+    return true;
+  } catch (error) {
+    console.error('❌ Database connection failed:', error);
+    return false;
+  }
+}
 
 // Prize account configuration from environment
 const PRIZE_ACCOUNT_ID = process.env.PRIZE_ACCOUNT_ID || "0.0.4353168";
@@ -82,6 +138,13 @@ async function conductPrizeDrawing() {
   console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
 
   try {
+    // Test database connection first
+    const dbConnected = await testDatabaseConnection();
+    if (!dbConnected) {
+      console.log('❌ Database connection failed. Cannot conduct drawing.');
+      return;
+    }
+
     // Step 1: Query all accounts from database
     console.log('📋 Step 1: Querying all accounts from database...');
     const allAccounts = await prisma.account.findMany({
@@ -249,6 +312,14 @@ switch (action) {
     // Test mode - just show current state without conducting drawing
     (async () => {
       console.log('🧪 TEST MODE: Showing current state without conducting drawing\n');
+      console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
+      
+      // Test database connection first
+      const dbConnected = await testDatabaseConnection();
+      if (!dbConnected) {
+        console.log('⚠️  Database connection failed. Please check your configuration.');
+        process.exit(1);
+      }
       
       const accounts = await prisma.account.findMany({ where: { isActive: true } });
       console.log(`Active accounts in database: ${accounts.length}`);
@@ -286,12 +357,19 @@ switch (action) {
     console.log('  🔐 Cryptographically secure random numbers via Hedera PRNG');
     console.log('  🔍 Verifiable randomness with transaction IDs');
     console.log('  ⚖️  Weighted selection based on staked amounts');
+    console.log('  🌍 Environment-aware database support (dev SQLite / prod Azure SQL)');
     console.log('');
     console.log('Available commands:');
-    console.log('  npm run drawing draw  - Conduct a new prize drawing');
-    console.log('  npm run drawing test  - Show current state (test mode)');
+    console.log('  Development (SQLite):');
+    console.log('    npm run drawing draw  - Conduct a new prize drawing');
+    console.log('    npm run drawing test  - Show current state (test mode)');
     console.log('');
-    console.log('⚠️  IMPORTANT: Only run this script manually when you want to conduct an official drawing!');
+    console.log('  Production (Azure SQL):');
+    console.log('    npm run drawing:prod      - Conduct drawing on production database');
+    console.log('    npm run drawing:prod:test - Show production database state');
+    console.log('');
+    console.log('⚠️  IMPORTANT: Only run drawing commands when conducting official drawings!');
     console.log('🔑 Requires PRIZE_ACCOUNT_KEY environment variable for Hedera PRNG transactions.');
+    console.log(`🔧 Current environment: ${process.env.NODE_ENV || 'development'}`);
     process.exit(0);
 }
