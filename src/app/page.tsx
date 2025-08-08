@@ -81,7 +81,7 @@ export default function Home() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              address: stakedAccount,
+              address: accountId,
               balance: connectedAccountBalance
             })
           });
@@ -106,12 +106,12 @@ export default function Home() {
           const accountsResponse = await fetch('/api/accounts');
           const accounts = await accountsResponse.json();
           
-          let resultText = "Account balances:\\n";
+          let resultText = "Account balances:\n";
           accounts.forEach((acc: any) => 
-            resultText += `${acc.address} - ${Number(acc.balance)}\\n`
+            resultText += `${acc.address} - ${Number(acc.balance)}\n`
           );
           
-          resultText += `\\nRandom Number: ${drawRandomNumber}\\n`;
+          resultText += `\nRandom Number: ${drawRandomNumber}\n`;
           
           // Find winner
           const winnerResponse = await fetch(`/api/winner?randomNumber=${drawRandomNumber}`);
@@ -219,7 +219,7 @@ export default function Home() {
                     console.log("Random Number", randomNumber);
                   });
                 } else { 
-                  setSimText("Error in simulation:\\nTotal Amount Staked is unknown.");
+                  setSimText("Error in simulation:\nTotal Amount Staked is unknown.");
                 }
               }}
             >
@@ -229,10 +229,10 @@ export default function Home() {
               id="sim_text"
               multiline
               rows={10}
-              defaultValue={simText}
+              value={simText}
               variant="filled"
               InputProps={{
-                style: { color: '#000080' }
+                style: { color: '#000080', whiteSpace: 'pre-line' }
               }}
             />
           </Stack>
