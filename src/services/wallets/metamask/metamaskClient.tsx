@@ -1,5 +1,4 @@
-import { ContractId, AccountId } from "@hashgraph/sdk";
-import { TokenId } from "@hashgraph/sdk/lib/transaction/TransactionRecord";
+import { ContractId, AccountId, TokenId } from "@hiero-ledger/sdk";
 import { ethers } from "ethers";
 import { useContext, useEffect } from "react";
 import { appConfig } from "../../../config";
@@ -47,7 +46,7 @@ const getProvider = () => {
     throw new Error("Metamask is not installed! Go install the extension!");
   }
 
-  return new ethers.providers.Web3Provider(ethereum);
+  return new ethers.BrowserProvider(ethereum);
 }
 
 // returns a list of accounts
@@ -91,7 +90,7 @@ class MetaMaskWallet implements WalletInterface {
     // build the transaction
     const tx = await signer.populateTransaction({
       to: this.convertAccountIdToSolidityAddress(toAddress),
-      value: ethers.utils.parseEther(amount.toString()),
+      value: ethers.parseEther(amount.toString()),
     });
     try {
       // send the transaction
@@ -128,7 +127,8 @@ class MetaMaskWallet implements WalletInterface {
 
   async transferNonFungibleToken(toAddress: AccountId, tokenId: TokenId, serialNumber: number) {
     const provider = getProvider();
-    const addresses = await provider.listAccounts();
+    const signer = await provider.getSigner();
+    const fromAddress = await signer.getAddress();
     const hash = await this.executeContractFunction(
       ContractId.fromString(tokenId.toString()),
       'transferFrom',
@@ -136,7 +136,7 @@ class MetaMaskWallet implements WalletInterface {
         .addParam({
           type: "address",
           name: "from",
-          value: addresses[0]
+          value: fromAddress
         })
         .addParam({
           type: "address",
@@ -218,7 +218,7 @@ export const MetaMaskClient = () => {
       const provider = getProvider();
       provider.listAccounts().then((signers) => {
         if (signers.length !== 0) {
-          setMetamaskAccountAddress(signers[0]);
+          setMetamaskAccountAddress(signers[0].address);
         } else {
           setMetamaskAccountAddress("");
         }

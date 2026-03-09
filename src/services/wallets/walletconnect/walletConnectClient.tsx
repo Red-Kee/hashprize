@@ -3,7 +3,7 @@
 import { WalletConnectContext } from "../../../contexts/WalletConnectContext";
 import { useCallback, useContext, useEffect } from 'react';
 import { WalletInterface } from "../walletInterface";
-import { AccountId, ContractExecuteTransaction, ContractId, LedgerId, TokenAssociateTransaction, TokenId, Transaction, TransactionId, TransferTransaction, Client, AccountUpdateTransaction, PrngTransaction, TransactionRecordQuery } from "@hashgraph/sdk";
+import { AccountId, ContractExecuteTransaction, ContractId, LedgerId, TokenAssociateTransaction, TokenId, Transaction, TransactionId, TransferTransaction, Client, AccountUpdateTransaction, PrngTransaction, TransactionRecordQuery } from "@hiero-ledger/sdk";
 import { ContractFunctionParameterBuilder } from "../contractFunctionParameterBuilder";
 import { appConfig } from "../../../config";
 import { SignClientTypes } from "@walletconnect/types";
@@ -153,7 +153,7 @@ class WalletConnectWallet implements WalletInterface {
       .setRange(range);
 
     const frozenTx = this.freezeTx(transaction);
-    const txResult = await this.signAndExecuteTransaction(frozenTx);
+    await this.signAndExecuteTransaction(frozenTx);
     // Using mirror node to get the completed transaction ID since WalletConnect doesn't seem to give it
     const mirrorNodeClient = new MirrorNodeClient(appConfig.networks.testnet);
     const lastTxResponse = await mirrorNodeClient.getLastTransaction(this.accountId(),"UTILPRNG");

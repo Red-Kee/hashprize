@@ -1,4 +1,4 @@
-import { AccountId, ContractId, TokenId, TransactionId } from "@hashgraph/sdk";
+import { AccountId, ContractId, TokenId, TransactionId } from "@hiero-ledger/sdk";
 import { ContractFunctionParameterBuilder } from "./contractFunctionParameterBuilder";
 
 export interface WalletInterface {

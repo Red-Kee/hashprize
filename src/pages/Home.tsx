@@ -1,24 +1,16 @@
-import { Button, MenuItem, TextField, Typography } from "@mui/material";
+import { Button, TextField, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 import { useWalletInterface } from "../services/wallets/useWalletInterface";
-import SendIcon from '@mui/icons-material/Send';
 import { useEffect, useState } from "react";
-import { AccountId, TokenId, Hbar, HbarUnit } from "@hashgraph/sdk";
-import { MirrorNodeAccountTokenBalanceWithInfo, MirrorNodeClient } from "../services/wallets/mirrorNodeClient";
+import { AccountId, Hbar, HbarUnit } from "@hiero-ledger/sdk";
+import { MirrorNodeClient } from "../services/wallets/mirrorNodeClient";
 import { appConfig } from "../config";
 import { addAccount, getAllAccounts, getLastDrawing, getTotalAccountBalances, getTotalAccounts, getWinner } from "../services/mockDatabaseActions";
 
-const UNSELECTED_SERIAL_NUMBER = -1;
-
 export default function Home() {
   const { walletInterface, accountId } = useWalletInterface();
-  const [toAccountId, setToAccountId] = useState("");
-  const [amount, setAmount] = useState<number>(0);
-  const [availableTokens, setAvailableTokens] = useState<MirrorNodeAccountTokenBalanceWithInfo[]>([]);
   const [stakedAccount, setStakedAccount] = useState("");
   const [connectedAccountBalance, setConnectedAccountBalance] = useState<number>();
-  const [selectedTokenId, setSelectedTokenId] = useState<string>('');
-  const [serialNumber, setSerialNumber] = useState<number>(UNSELECTED_SERIAL_NUMBER);
   const [totalAccounts, setTotalAccounts] = useState<number>();
   const [totalStaked, setTotalStaked] = useState<number>();
   const [stakePercent, setStakePercent] = useState("");
@@ -36,8 +28,6 @@ export default function Home() {
     const mirrorNodeClient = new MirrorNodeClient(appConfig.networks.testnet);
     // Get token balance with token info for the current account
     mirrorNodeClient.getAccountTokenBalancesWithTokenInfo(AccountId.fromString(accountId)).then((tokens) => {
-      // set to state
-      setAvailableTokens(tokens);
       console.log(tokens);
     }).catch((error: unknown) => {
       console.error(error);
@@ -52,17 +42,6 @@ export default function Home() {
       console.error(error);
     });
   }, [accountId])
-
-  // Filter out tokens with a balance of 0
-  const tokensWithNonZeroBalance = availableTokens.filter((token) => token.balance > 0);
-  // Get the selected token balance with info
-  const selectedTokenBalanceWithInfo = availableTokens.find((token) => token.token_id === selectedTokenId);
-
-  // reset amount and serial number when token id changes
-  useEffect(() => {
-    setAmount(0);
-    setSerialNumber(UNSELECTED_SERIAL_NUMBER);
-  }, [selectedTokenId]);
 
   useEffect(() => {
     if(stakedAccount === prizeAccount) {

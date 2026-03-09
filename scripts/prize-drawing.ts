@@ -1,4 +1,4 @@
-import { AccountId, Hbar, HbarUnit, Client, PrivateKey, PrngTransaction } from '@hashgraph/sdk';
+import { AccountId, Hbar, HbarUnit, Client, PrivateKey, PrngTransaction } from '@hiero-ledger/sdk';
 import { MirrorNodeClient } from '../src/services/wallets/mirrorNodeClient';
 import { appConfig } from '../src/config';
 import { Decimal } from '@prisma/client/runtime/library';

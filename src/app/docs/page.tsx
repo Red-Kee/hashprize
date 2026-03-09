@@ -13,15 +13,13 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
-  Chip,
-  Divider
+  Chip
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoIcon from '@mui/icons-material/Info';
 import SecurityIcon from '@mui/icons-material/Security';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
-import CodeIcon from '@mui/icons-material/Code';
 
 const DocsPage: React.FC = () => {
   return (

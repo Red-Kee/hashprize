@@ -1,4 +1,4 @@
-import { AccountId } from "@hashgraph/sdk";
+import { AccountId } from "@hiero-ledger/sdk";
 import { NetworkConfig } from "../../config";
 
 export interface MirrorNodeAccountTokenBalance {

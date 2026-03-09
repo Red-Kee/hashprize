@@ -4,21 +4,14 @@ import { Button, TextField, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 import { useWalletInterface } from "../services/wallets/useWalletInterface";
 import { useEffect, useState } from "react";
-import { AccountId, Hbar, HbarUnit } from "@hashgraph/sdk";
-import { MirrorNodeAccountTokenBalanceWithInfo, MirrorNodeClient } from "../services/wallets/mirrorNodeClient";
+import { AccountId, Hbar, HbarUnit } from "@hiero-ledger/sdk";
+import { MirrorNodeClient } from "../services/wallets/mirrorNodeClient";
 import { appConfig } from "../config";
-
-const UNSELECTED_SERIAL_NUMBER = -1;
 
 export default function Home() {
   const { walletInterface, accountId } = useWalletInterface();
-  const [toAccountId, setToAccountId] = useState("");
-  const [amount, setAmount] = useState<number>(0);
-  const [availableTokens, setAvailableTokens] = useState<MirrorNodeAccountTokenBalanceWithInfo[]>([]);
   const [stakedAccount, setStakedAccount] = useState("");
   const [connectedAccountBalance, setConnectedAccountBalance] = useState<number>();
-  const [selectedTokenId, setSelectedTokenId] = useState<string>('');
-  const [serialNumber, setSerialNumber] = useState<number>(UNSELECTED_SERIAL_NUMBER);
   const [totalAccounts, setTotalAccounts] = useState<number>();
   const [totalStaked, setTotalStaked] = useState<number>();
   const [stakePercent, setStakePercent] = useState("");
@@ -35,7 +28,6 @@ export default function Home() {
     const mirrorNodeClient = new MirrorNodeClient(appConfig.networks.testnet);
     
     mirrorNodeClient.getAccountTokenBalancesWithTokenInfo(AccountId.fromString(accountId)).then((tokens) => {
-      setAvailableTokens(tokens);
       console.log(tokens);
     }).catch((error: unknown) => {
       console.error(error);
@@ -52,18 +44,12 @@ export default function Home() {
     });
   }, [accountId])
 
-  // reset amount and serial number when token id changes
-  useEffect(() => {
-    setAmount(0);
-    setSerialNumber(UNSELECTED_SERIAL_NUMBER);
-  }, [selectedTokenId]);
-
   useEffect(() => {
     const fetchDBState = async () => {
       try {
         // Call API endpoints instead of direct database functions
         const accountsResponse = await fetch('/api/accounts');
-        const accounts = await accountsResponse.json();
+        await accountsResponse.json();
         
         const statsResponse = await fetch('/api/stats');
         const stats = await statsResponse.json();
@@ -97,7 +83,7 @@ export default function Home() {
     };
     
     fetchDBState();
-  }, [stakedAccount, totalStaked, totalAccounts, previousWinner, connectedAccountBalance]);
+  }, [stakedAccount, totalStaked, totalAccounts, previousWinner, connectedAccountBalance, accountId]);
 
   useEffect(() => {
     if(drawRandomNumber) {
