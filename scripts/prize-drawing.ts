@@ -1,4 +1,4 @@
-import { AccountId, Hbar, HbarUnit, Client, PrivateKey, PrngTransaction } from '@hiero-ledger/sdk';
+import { AccountId, Hbar, HbarUnit, Client, PrivateKey, PrngTransaction, TransferTransaction } from '@hiero-ledger/sdk';
 import { MirrorNodeClient } from '../src/services/wallets/mirrorNodeClient';
 import { appConfig } from '../src/config';
 import { Decimal } from '@prisma/client/runtime/library';
@@ -126,6 +126,32 @@ async function generateHederaRandomNumber(maxRange: number): Promise<{ randomNum
   }
 }
 
+async function collectPrizeAccountStakingRewards(): Promise<{ transactionId: string; netBalanceChangeHbar: number }> {
+  console.log('🪙 Collecting staking rewards for prize account...');
+
+  const beforeInfo = await mirrorNodeClient.getAccountInfo(AccountId.fromString(PRIZE_ACCOUNT_ID));
+  const balanceBefore = Hbar.fromTinybars(beforeInfo.balance.balance).to(HbarUnit.Hbar).toNumber();
+
+  // Any transaction paid by the prize account can trigger pending staking reward settlement.
+  const rewardCollectionTransaction = new PrngTransaction()
+    .setTransactionMemo('HashPrize staking reward collection')
+    .setMaxTransactionFee(new Hbar(1));
+
+  const response = await rewardCollectionTransaction.execute(client);
+  await response.getReceipt(client);
+
+  // Mirror node updates are eventually consistent; pause briefly before reading updated balance.
+  await new Promise(resolve => setTimeout(resolve, 1500));
+
+  const afterInfo = await mirrorNodeClient.getAccountInfo(AccountId.fromString(PRIZE_ACCOUNT_ID));
+  const balanceAfter = Hbar.fromTinybars(afterInfo.balance.balance).to(HbarUnit.Hbar).toNumber();
+
+  return {
+    transactionId: response.transactionId.toString(),
+    netBalanceChangeHbar: balanceAfter - balanceBefore
+  };
+}
+
 interface AccountWithBalance {
   address: string;
   balance: number;
@@ -144,6 +170,11 @@ async function conductPrizeDrawing() {
       console.log('❌ Database connection failed. Cannot conduct drawing.');
       return;
     }
+
+    // Step 0: Collect pending staking rewards in prize account before prize calculations.
+    const rewardCollection = await collectPrizeAccountStakingRewards();
+    console.log(`✅ Reward collection tx: ${rewardCollection.transactionId}`);
+    console.log(`🧾 Net prize account balance change: ${rewardCollection.netBalanceChangeHbar.toFixed(8)}ℏ\n`);
 
     // Step 1: Query all accounts from database
     console.log('📋 Step 1: Querying all accounts from database...');
@@ -258,11 +289,41 @@ async function conductPrizeDrawing() {
     console.log(`   Balance: ${winner.balance.toFixed(4)}ℏ`);
     console.log(`   Win probability: ${((winner.balance / totalStaked) * 100).toFixed(2)}%`);
 
-    // Calculate prize (10% of total pool)
-    const prizeAmount = totalStaked * 0.1;
+    // Calculate prize (amount over 777ℏ in the prize account)
+    const accountInfo = await mirrorNodeClient.getAccountInfo(AccountId.fromString(PRIZE_ACCOUNT_ID));
+    const prizeAccountBalance = Hbar.fromTinybars(accountInfo.balance.balance).to(HbarUnit.Hbar).toNumber();
+    let prizeAmount = 0; // Default to 0 if prize account balance is insufficient
+    if (prizeAccountBalance > 777) {
+      prizeAmount = prizeAccountBalance - 777; // Keep 777ℏ in the prize account for future drawings
+    }
 
-    // Step 7: Add drawing result to database
-    console.log('\n💾 Step 7: Recording drawing result...');
+    // Step 7: Send payout to winner
+    console.log('\n💸 Step 7: Sending payout to winner...');
+    let payoutTransactionId = 'no-payout';
+    if (prizeAmount > 0) {
+      const prizeTinybars = Math.floor(prizeAmount * 100_000_000);
+
+      if (prizeTinybars > 0) {
+        const payoutTransaction = new TransferTransaction()
+          .addHbarTransfer(AccountId.fromString(PRIZE_ACCOUNT_ID), Hbar.fromTinybars(-prizeTinybars))
+          .addHbarTransfer(AccountId.fromString(winner.address), Hbar.fromTinybars(prizeTinybars))
+          .setTransactionMemo('HashPrize drawing payout');
+
+        const payoutResponse = await payoutTransaction.execute(client);
+        const payoutReceipt = await payoutResponse.getReceipt(client);
+        payoutTransactionId = payoutResponse.transactionId.toString();
+
+        console.log(`✅ Payout submitted. Status: ${payoutReceipt.status.toString()}`);
+        console.log(`📋 Payout Transaction ID: ${payoutTransactionId}`);
+      } else {
+        console.log('⚠️  Prize amount is below 1 tinybar after rounding. Skipping payout.');
+      }
+    } else {
+      console.log('ℹ️  Prize amount is 0. Skipping payout.');
+    }
+
+    // Step 8: Add drawing result to database
+    console.log('\n💾 Step 8: Recording drawing result...');
     const drawingResult = await prisma.drawing.create({
       data: {
         date: new Date(),
@@ -272,7 +333,8 @@ async function conductPrizeDrawing() {
         totalParticipants: accountsWithBalance.length,
         randomNumber: randomNumber,
         prize: new Decimal(prizeAmount.toFixed(8)),
-        prngTransactionId: prngResult.transactionId
+        prngTransactionId: prngResult.transactionId,
+        payoutTransactionId: payoutTransactionId
       }
     });
 
@@ -287,6 +349,7 @@ async function conductPrizeDrawing() {
     console.log(`Total Pool: ${totalStaked.toFixed(4)}ℏ`);
     console.log(`Random Number: ${randomNumber}`);
     console.log(`🔐 PRNG Transaction ID: ${prngResult.transactionId}`);
+    console.log(`💸 Payout Transaction ID: ${payoutTransactionId}`);
     console.log(`Drawing Date: ${drawingResult.date.toISOString()}`);
     console.log('================================');
 

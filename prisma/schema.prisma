@@ -31,5 +31,6 @@ model Drawing {
   randomNumber    Int
   prize           Decimal
   prngTransactionId String?
+  payoutTransactionId String?
   winner          Account? @relation(fields: [winnerAddress], references: [address])
 }
