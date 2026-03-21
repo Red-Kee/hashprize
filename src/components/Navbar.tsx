@@ -1,6 +1,6 @@
 'use client'
 
-import { AppBar, Button, Toolbar, Typography, Box } from '@mui/material';
+import { AppBar, Button, Toolbar, Box } from '@mui/material';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -28,13 +28,20 @@ export default function NavBar() {
 
   return (
     <AppBar position='relative'>
-      <Toolbar>
-        <img src="/images/hbar-logo.svg" alt='An upper case H with a line through the top' className='hbarLogoImg' />
-        <Typography variant="h6" color="white" pl={1} noWrap>
-          Hedera Hackathon
-        </Typography>
+      <Toolbar sx={{ overflow: 'visible' }}>
+        <img
+          src="/images/HashPrizeLogo-TransparentBG.png"
+          alt='HashPrize logo'
+          style={{
+            height: 64,
+            width: 'auto',
+            display: 'block',
+            transform: 'scale(2)',
+            transformOrigin: 'left center'
+          }}
+        />
         
-        <Box sx={{ ml: 4, display: 'flex', gap: 2 }}>
+        <Box sx={{ ml: 12, display: 'flex', gap: 2 }}>
           <Button
             color="inherit"
             component={Link}

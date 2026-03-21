@@ -74,7 +74,7 @@ export default function Home() {
         }
 
         if((stakedAccount === prizeAccount) && connectedAccountBalance && stats.totalStaked) {
-          setStakePercent((connectedAccountBalance*100/stats.totalStaked).toFixed(5));
+          setStakePercent((connectedAccountBalance*100/stats.totalStaked).toFixed(1));
         }
       } catch (error) {
         console.error('Error fetching database state:', error);
@@ -94,7 +94,7 @@ export default function Home() {
           
           let resultText = "Account balances:\n";
           accounts.forEach((acc: any) => 
-            resultText += `${acc.address} - ${Number(acc.balance)}\n`
+            resultText += `${acc.address}: ${Number(acc.balance).toFixed(1)}\n`
           );
           
           resultText += `\nRandom Number: ${drawRandomNumber}\n`;
@@ -134,7 +134,7 @@ export default function Home() {
         justifyContent='space-evenly'
       >
         <Typography color="#000080">
-          Total Amount Staked: {totalStaked}
+          Total Amount Staked: {totalStaked?.toFixed(1)}
           <br/>
           Accounts: {totalAccounts}
           <br/>
@@ -155,7 +155,7 @@ export default function Home() {
               <Typography color="#000080">
                 Your account is staked to Hashprize. Thanks!
                 <br/>
-                Your amount is {connectedAccountBalance?.toFixed(4)}ℏ
+                Account balance: {connectedAccountBalance?.toFixed(1)}ℏ
                 <br/>
                 Your share of the pool: {stakePercent}%
               </Typography>

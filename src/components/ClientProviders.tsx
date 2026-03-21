@@ -31,12 +31,14 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
         sx={{
           display: 'flex',
           flexDirection: 'column',
-          minHeight: '100vh',
-          backgroundColor: '#87CEEB',
-          backgroundImage: 'url(/images/pool-party-background.png)',
-          backgroundSize: 'cover',
+          width: '100%',
+          minHeight: '100dvh',
+          backgroundColor: '#c5dbf2',
+          backgroundImage:
+            'linear-gradient(180deg, #b9d3eb 0%, #9cbfdd 52%, #a9d1bf 100%)',
           backgroundRepeat: 'no-repeat',
-          backgroundPosition: 'center'
+          backgroundSize: '100% 100%',
+          backgroundAttachment: 'scroll'
         }}
       >
         {isClient ? (
